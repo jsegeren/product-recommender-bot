@@ -9,9 +9,16 @@ import json
 import time
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import hashlib
-
+import blake3
 from dotenv import load_dotenv
+from tkinter import ttk
+import tkinter as tk
+import customtkinter as ctk
+import threading
+import math
+
+ctk.set_appearance_mode("System")
+ctk.set_default_color_theme("blue")
 
 load_dotenv()
 
@@ -20,9 +27,9 @@ PINECONE_API_KEY = os.getenv("PINECONE_API_KEY", "")
 PINECONE_API_ENVIRONMENT = os.getenv("PINECONE_API_ENVIRONMENT", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
-print(f"Pinecone API Key: {PINECONE_API_KEY}")
-print(f"Pinecone API Environment: {PINECONE_API_ENVIRONMENT}")
-print(f"OpenAI API Key: {OPENAI_API_KEY}")
+# print(f"Pinecone API Key: {PINECONE_API_KEY}")
+# print(f"Pinecone API Environment: {PINECONE_API_ENVIRONMENT}")
+# print(f"OpenAI API Key: {OPENAI_API_KEY}")
 
 NUMBER_TOTAL_PRODUCTS = 3000
 NUMBER_FILTERED_PRODUCTS = 20
@@ -36,17 +43,21 @@ REQUEST_PARALLEL_CALLS = 10
 HASH_FILENAME = "hash.txt"
 DATA_FILENAME = "sample_products.csv"
 
+UI_APP_TITLE = "Gift Recommendation Assistant"
+UI_SCALING = 1.3
+UI_WINDOW_WIDTH = 1100
+UI_WINDOW_HEIGHT = 580
+
 def compute_file_hash(filename):
-    hash_md5 = hashlib.md5()
+    hash_blake3 = blake3.blake3()
     with open(filename, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
+            hash_blake3.update(chunk)
+    return hash_blake3.hexdigest()
 
 def clear_index_data(pinecone_index):
     # Delete all vectors from the index
     pinecone_index.delete(deleteAll=True)
-
 
 def generate_single_embedding(text, model="text-embedding-ada-002", retries=REQUEST_RETRIES, backoff=REQUEST_RETRY_BACKOFF):
     openai.api_key = OPENAI_API_KEY
@@ -342,6 +353,116 @@ def load_data(filename):
     )
     return data
 
+class ChatBotUI(ctk.CTk):
+    def __init__(self, pinecone_index, data):
+        super().__init__()
+        self.pinecone_index = pinecone_index
+        self.data = data
+        self.chat_labels = []  
+        self.create_chat_area()
+        self.title(UI_APP_TITLE)
+        self.geometry(f"{UI_WINDOW_WIDTH}x{UI_WINDOW_HEIGHT}")
+
+        self.create_text_input_area()
+
+        ctk.set_widget_scaling(UI_SCALING)  # Custom DPI scaling
+
+    def create_chat_area(self):
+        self.chat_area_frame = ctk.CTkFrame(self)
+        self.chat_area_frame.pack(expand=True, fill=tk.BOTH, padx=5, pady=5)
+
+        self.chat_area = ctk.CTkScrollableFrame(self.chat_area_frame)
+        self.chat_area.pack(expand=True, fill=tk.BOTH)
+
+    def create_text_input_area(self):
+        self.text_input_frame = ctk.CTkFrame(self)
+        self.text_input_frame.pack(fill=tk.X, padx=5, pady=5)
+
+        self.text_input = ctk.CTkEntry(
+            self.text_input_frame, font=ctk.CTkFont(size=12), width=30
+        )
+        self.text_input.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        self.text_input.bind("<Return>", self.on_submit)
+
+        self.submit_button = ctk.CTkButton(
+            self.text_input_frame,
+            text="Submit",
+            command=self.on_submit,
+        )
+        self.submit_button.pack(side=tk.RIGHT)
+
+    def append_chat(self, role, message):
+        text = ""
+        if role == "user":
+            text = f"You: {message}"
+        elif role == "bot":
+            text = f"Bot: {message}"
+
+        # Calculate the number of lines based on the width and height of the text
+        font = ctk.CTkFont(size=12)
+        linespace = font.metrics()['linespace']
+        text_width = font.measure(text)
+        num_lines = math.ceil(text_width / (round(UI_WINDOW_WIDTH * 0.8)) * linespace * 2.3)
+
+        chat_text = ctk.CTkTextbox(
+            self.chat_area,
+            wrap=tk.WORD,
+            font=ctk.CTkFont(size=12),
+            padx=10,
+            pady=10,
+            width=(round(UI_WINDOW_WIDTH * 0.8)),
+            height=num_lines,
+        )
+
+        chat_text.insert(tk.END, text)
+        chat_text.configure(state='disabled')  # Disable editing
+
+        chat_text.pack(anchor=tk.W, padx=(10 if role == "bot" else 50), pady=5)
+
+        self.chat_labels.append(chat_text)
+        self.chat_area.update()
+
+    def append_loading_spinner(self):
+        self.loading_spinner = ctk.CTkLabel(
+            self.chat_area,
+            text="Great! Working on it...",
+            font=ctk.CTkFont(size=12),
+            padx=10,
+            pady=10
+        )
+        self.loading_spinner.pack(anchor=tk.W, padx=50, pady=5)
+
+    def remove_loading_spinner(self):
+        self.loading_spinner.pack_forget()
+        self.chat_area.update()
+
+    def on_submit(self, event=None):
+        user_input = self.text_input.get().strip()
+        if user_input:
+            self.text_input.delete(0, tk.END)
+            self.append_chat("user", user_input)
+
+            # Disable text input and submit button
+            self.text_input.configure(state='disabled')
+            self.submit_button.configure(state='disabled')
+
+            recommendation_thread = threading.Thread(target=self.get_recommendations_and_append, args=(user_input,))
+            recommendation_thread.start()
+
+    def get_recommendations_and_append(self, user_input):
+        self.append_loading_spinner()
+
+        recommendations = recommend_gifts(
+            user_input, self.pinecone_index, self.data, NUMBER_FILTERED_PRODUCTS, NUMBER_FINAL_RECOMMENDATIONS
+        )
+
+        self.remove_loading_spinner()
+        self.append_chat("bot", recommendations)
+
+        # Re-enable text input and submit button
+        self.text_input.configure(state='normal')
+        self.submit_button.configure(state='normal')
+        
 
 def main():
     if not os.path.exists(DATA_FILENAME) or os.path.getsize(DATA_FILENAME) == 0:
@@ -377,15 +498,34 @@ def main():
         with open(HASH_FILENAME, "w") as f:
             f.write(current_hash)
 
-    # Test Pinecone-based recommendation
-    user_description = input(
-        "Hi there! Welcome to Joshua's Gifts. What kind of gift are you looking for today?\n\n"
-    )
-    recommendations = recommend_gifts(
-        user_description, pinecone_index, data, NUMBER_FILTERED_PRODUCTS, NUMBER_FINAL_RECOMMENDATIONS
+    # Display UI
+    # display_ui(lambda user_description: recommend_gifts(user_description, pinecone_index, data, NUMBER_FILTERED_PRODUCTS, NUMBER_FINAL_RECOMMENDATIONS))
+
+     # Display UI
+     # Initialize Tkinter
+    ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
+    ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
+
+    chatbot_ui = ChatBotUI(pinecone_index, data)
+
+    # Show welcome message
+    chatbot_ui.append_chat(
+        "bot",
+        "Hi there! Welcome to Joshua's Gifts. What kind of gift are you looking for today?",
     )
 
-    print(recommendations)
+    # Run the Tkinter event loop
+    chatbot_ui.mainloop()
+
+    # Test Pinecone-based recommendation
+    # user_description = input(
+    #     "Hi there! Welcome to Joshua's Gifts. What kind of gift are you looking for today?\n\n"
+    # )
+    # recommendations = recommend_gifts(
+    #     user_description, pinecone_index, data, NUMBER_FILTERED_PRODUCTS, NUMBER_FINAL_RECOMMENDATIONS
+    # )
+
+    # print(recommendations)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,6 @@
 pandas
 openai
-pinecone
+pinecone-client
 python-dotenv
+blake3
+customtkinter
