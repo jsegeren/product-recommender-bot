@@ -16,6 +16,7 @@ import tkinter as tk
 import customtkinter as ctk
 import threading
 import math
+import textwrap
 
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
@@ -238,7 +239,7 @@ def recommend_gifts(
             f"{product_id}. {product_name} ({product_price}) - {product_description}\n"
         )
 
-    prompt += "\nPlease give your recommendations in this format: {rank}. *{product name}* ({product price}) - {reason / explanation why this is a good gift suggestion}."
+    prompt += "\nPlease give your recommendations in this format: {rank}. *{product name}* (${product price}) - {reason / explanation why this is a good gift suggestion}."
 
     # print("Prompt: ", prompt)
 
@@ -465,8 +466,9 @@ def parse_giftem_data(filename):
         images = [image["url"] for image in product.get("images", [])]
 
         # Set product_price to unitPrice if channelSpecific is not empty, otherwise set it to None
+        # Note that this dataset seems to represent prices in units of cents; we want to convert to dollars
         product_price = (
-            product["channelSpecific"][0]["configs"]["unitPrice"]
+            product["channelSpecific"][0]["configs"]["unitPrice"] / 100
             if product.get("channelSpecific")
             else None
         )
@@ -537,18 +539,46 @@ class ChatBotUI(ctk.CTk):
         )
         self.submit_button.pack(side=tk.RIGHT)
 
-    def update_chat_height(self, chat_text):
+    def count_textbox_lines(self, textbox):
+        text = textbox.get(1.0, tk.END).strip()
         font = ctk.CTkFont(size=12)
         linespace = font.metrics()["linespace"]
-        text = chat_text.get(1.0, tk.END).strip()
-
-        text_width = font.measure(text)
-        num_lines = math.ceil(
-            text_width / (round(UI_WINDOW_WIDTH * 0.8)) * linespace * 2.3
+        widget_width = round(UI_WINDOW_WIDTH * 0.8)
+        wrap_width = widget_width // font.measure("a")
+        wrapped_lines = textwrap.wrap(text, wrap_width)
+        num_lines = len(wrapped_lines) + sum(
+            [line.count("\n") for line in wrapped_lines]
         )
+        return num_lines
 
-        chat_text.configure(height=num_lines)
-        self.chat_area.update_idletasks()
+    def calculate_textbox_height(self, old_chat_text):
+        num_lines = self.count_textbox_lines(old_chat_text)
+        font = ctk.CTkFont(size=12)
+        linespace = font.metrics()["linespace"]
+        return num_lines * linespace * 2.1
+
+    def create_new_textbox(self, old_chat_text, role):
+        new_height = self.calculate_textbox_height(old_chat_text)
+
+        new_chat_text = ctk.CTkTextbox(
+            self.chat_area,
+            wrap=tk.WORD,
+            font=ctk.CTkFont(size=12),
+            padx=10,
+            pady=10,
+            width=(round(UI_WINDOW_WIDTH * 0.8)),
+            height=math.ceil(new_height),
+            activate_scrollbars=False,
+        )
+        new_chat_text.insert(tk.END, old_chat_text.get(1.0, tk.END))
+        new_chat_text.configure(state="disabled")
+
+        if role == "bot":
+            self.bot_message_in_progress = new_chat_text
+        else:
+            self.chat_labels.append(new_chat_text)
+
+        return new_chat_text
 
     def update_chat(
         self, message, update_existing=False, streaming=False, first_chunk=False
@@ -557,45 +587,44 @@ class ChatBotUI(ctk.CTk):
             self.append_chat("bot", "", update_existing=update_existing)
             self.new_bot_bubble_required = False
 
-        # Update the chat height and chat area
         if self.bot_message_in_progress:
             chat_text = self.bot_message_in_progress
             chat_text.configure(state="normal")
 
-            if streaming:
-                chat_text.delete(1.0, tk.END)
-                chat_text.insert(tk.END, f"Bot: {message}")
-            else:
-                chat_text.delete(1.0, tk.END)
-                chat_text.insert(tk.END, f"Bot: {message}")
+            # if streaming:
+            chat_text.delete(1.0, tk.END)
+            chat_text.insert(tk.END, f"Bot: {message}")
+            # else:
+            # chat_text.delete(1.0, tk.END)
+            # chat_text.insert(tk.END, f"Bot: {message}")
 
             chat_text.configure(state="disabled")
 
-            self.update_chat_height(chat_text)  # Update height after changing text
-            self.chat_area.update_idletasks()
+            # Create a new textbox with the appropriate height and replace the old one
+            new_chat_text = self.create_new_textbox(chat_text, role="bot")
+            chat_text.pack_forget()
+            new_chat_text.pack(anchor=tk.W, padx=10, pady=5)
+            self.bot_message_in_progress = new_chat_text
+
+        self.chat_area.update_idletasks()
+        self.remove_loading_spinner()
 
     def append_chat(self, role, message, update_existing=False):
+        font = ctk.CTkFont(size=12)
+        linespace = font.metrics()["linespace"]
+        height = 1 * linespace * 2
+
         if update_existing and role == "bot" and self.bot_message_in_progress:
             chat_text = self.bot_message_in_progress
             chat_text.configure(state="normal")
-
             new_text = f"Bot: {message}"
-            self.update_chat_height(chat_text)  # Update height before changing text
-
             chat_text.delete(1.0, tk.END)
             chat_text.insert(tk.END, new_text)
-            chat_text.configure(state="disabled")  # Disable editing
+            chat_text.configure(state="disabled")
 
-            if not self.bot_message_in_progress or role == "user":
-                chat_text.pack(anchor=tk.W, padx=(10 if role == "bot" else 50), pady=5)
-                self.chat_labels.append(chat_text)
+            chat_text.pack(anchor=tk.W, padx=10, pady=5)
 
-            # Update the chat height
-            self.update_chat_height(chat_text)
-
-            # Update the chat area after idle
-            self.after_idle(self.chat_area.update)
-
+            self.chat_area.update()
         else:
             if role == "user":
                 message = f"You: {message}"
@@ -610,7 +639,8 @@ class ChatBotUI(ctk.CTk):
                         padx=10,
                         pady=10,
                         width=(round(UI_WINDOW_WIDTH * 0.8)),
-                        height=0,  # Set height to 0 for dynamic height based on content
+                        height=height,
+                        activate_scrollbars=False,
                     )
                     self.bot_message_in_progress.pack(anchor=tk.W, padx=10, pady=5)
                     self.chat_labels.append(self.bot_message_in_progress)
@@ -625,15 +655,17 @@ class ChatBotUI(ctk.CTk):
                     padx=10,
                     pady=10,
                     width=(round(UI_WINDOW_WIDTH * 0.8)),
-                    height=0,  # Set height to 0 for dynamic height based on content
+                    height=height,
+                    activate_scrollbars=False,
                 )
             )
 
             chat_text.insert(tk.END, message)
-            chat_text.configure(state="disabled")  # Disable editing
+            chat_text.configure(state="disabled")
+
+            chat_text.pack(anchor=tk.W, padx=(10 if role == "bot" else 50), pady=5)
 
             if not self.bot_message_in_progress or role == "user":
-                chat_text.pack(anchor=tk.W, padx=(10 if role == "bot" else 50), pady=5)
                 self.chat_labels.append(chat_text)
             self.chat_area.update()
 
