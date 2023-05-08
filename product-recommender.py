@@ -220,6 +220,7 @@ def recommend_gifts(
     dataframe,
     number_filtered_products,
     number_final_recommendations,
+    callback=None,
 ):
     top_products = retrieve_top_products(
         search_query, pinecone_index, dataframe, number_filtered_products
@@ -249,11 +250,25 @@ def recommend_gifts(
         n=1,
         stop=None,
         temperature=0.5,
+        stream=True,
     )
 
-    # print(response)
-
-    return response.choices[0].message["content"].strip()  # type: ignore
+    # Handle the streaming response and call the callback
+    message_parts = []
+    first_chunk = True
+    for chunk in response:
+        chunk_message = chunk["choices"][0]["delta"]
+        content = chunk_message.get("content", "")
+        if content:
+            message_parts.append(content)
+            if callback:
+                callback(
+                    "".join(message_parts),
+                    update_existing=not first_chunk,
+                    streaming=True,
+                    first_chunk=first_chunk,
+                )  # Add first_chunk parameter
+                first_chunk = False
 
 
 def generate_single_product(retries=REQUEST_RETRIES, backoff=REQUEST_RETRY_BACKOFF):
@@ -494,6 +509,8 @@ class ChatBotUI(ctk.CTk):
 
         self.create_text_input_area()
 
+        self.bot_message_in_progress = None
+
         ctk.set_widget_scaling(UI_SCALING)  # Custom DPI scaling
 
     def create_chat_area(self):
@@ -520,38 +537,105 @@ class ChatBotUI(ctk.CTk):
         )
         self.submit_button.pack(side=tk.RIGHT)
 
-    def append_chat(self, role, message):
-        text = ""
-        if role == "user":
-            text = f"You: {message}"
-        elif role == "bot":
-            text = f"Bot: {message}"
-
-        # Calculate the number of lines based on the width and height of the text
+    def update_chat_height(self, chat_text):
         font = ctk.CTkFont(size=12)
         linespace = font.metrics()["linespace"]
+        text = chat_text.get(1.0, tk.END).strip()
+
         text_width = font.measure(text)
         num_lines = math.ceil(
             text_width / (round(UI_WINDOW_WIDTH * 0.8)) * linespace * 2.3
         )
 
-        chat_text = ctk.CTkTextbox(
-            self.chat_area,
-            wrap=tk.WORD,
-            font=ctk.CTkFont(size=12),
-            padx=10,
-            pady=10,
-            width=(round(UI_WINDOW_WIDTH * 0.8)),
-            height=num_lines,
-        )
+        chat_text.configure(height=num_lines)
+        self.chat_area.update_idletasks()
 
-        chat_text.insert(tk.END, text)
-        chat_text.configure(state="disabled")  # Disable editing
+    def update_chat(
+        self, message, update_existing=False, streaming=False, first_chunk=False
+    ):
+        if not update_existing or first_chunk:
+            self.append_chat("bot", "", update_existing=update_existing)
+            self.new_bot_bubble_required = False
 
-        chat_text.pack(anchor=tk.W, padx=(10 if role == "bot" else 50), pady=5)
+        # Update the chat height and chat area
+        if self.bot_message_in_progress:
+            chat_text = self.bot_message_in_progress
+            chat_text.configure(state="normal")
 
-        self.chat_labels.append(chat_text)
-        self.chat_area.update()
+            if streaming:
+                chat_text.delete(1.0, tk.END)
+                chat_text.insert(tk.END, f"Bot: {message}")
+            else:
+                chat_text.delete(1.0, tk.END)
+                chat_text.insert(tk.END, f"Bot: {message}")
+
+            chat_text.configure(state="disabled")
+
+            self.update_chat_height(chat_text)  # Update height after changing text
+            self.chat_area.update_idletasks()
+
+    def append_chat(self, role, message, update_existing=False):
+        if update_existing and role == "bot" and self.bot_message_in_progress:
+            chat_text = self.bot_message_in_progress
+            chat_text.configure(state="normal")
+
+            new_text = f"Bot: {message}"
+            self.update_chat_height(chat_text)  # Update height before changing text
+
+            chat_text.delete(1.0, tk.END)
+            chat_text.insert(tk.END, new_text)
+            chat_text.configure(state="disabled")  # Disable editing
+
+            if not self.bot_message_in_progress or role == "user":
+                chat_text.pack(anchor=tk.W, padx=(10 if role == "bot" else 50), pady=5)
+                self.chat_labels.append(chat_text)
+
+            # Update the chat height
+            self.update_chat_height(chat_text)
+
+            # Update the chat area after idle
+            self.after_idle(self.chat_area.update)
+
+        else:
+            if role == "user":
+                message = f"You: {message}"
+                self.bot_message_in_progress = None
+            elif role == "bot":
+                message = f"Bot: {message}"
+                if not self.bot_message_in_progress:
+                    self.bot_message_in_progress = ctk.CTkTextbox(
+                        self.chat_area,
+                        wrap=tk.WORD,
+                        font=ctk.CTkFont(size=12),
+                        padx=10,
+                        pady=10,
+                        width=(round(UI_WINDOW_WIDTH * 0.8)),
+                        height=0,  # Set height to 0 for dynamic height based on content
+                    )
+                    self.bot_message_in_progress.pack(anchor=tk.W, padx=10, pady=5)
+                    self.chat_labels.append(self.bot_message_in_progress)
+
+            chat_text = (
+                self.bot_message_in_progress
+                if role == "bot" and self.bot_message_in_progress
+                else ctk.CTkTextbox(
+                    self.chat_area,
+                    wrap=tk.WORD,
+                    font=ctk.CTkFont(size=12),
+                    padx=10,
+                    pady=10,
+                    width=(round(UI_WINDOW_WIDTH * 0.8)),
+                    height=0,  # Set height to 0 for dynamic height based on content
+                )
+            )
+
+            chat_text.insert(tk.END, message)
+            chat_text.configure(state="disabled")  # Disable editing
+
+            if not self.bot_message_in_progress or role == "user":
+                chat_text.pack(anchor=tk.W, padx=(10 if role == "bot" else 50), pady=5)
+                self.chat_labels.append(chat_text)
+            self.chat_area.update()
 
     def append_loading_spinner(self):
         self.loading_spinner = ctk.CTkLabel(
@@ -572,6 +656,7 @@ class ChatBotUI(ctk.CTk):
         if user_input:
             self.text_input.delete(0, tk.END)
             self.append_chat("user", user_input)
+            self.new_bot_bubble_required = True
 
             # Disable text input and submit button
             self.text_input.configure(state="disabled")
@@ -591,6 +676,9 @@ class ChatBotUI(ctk.CTk):
             self.data,
             NUMBER_FILTERED_PRODUCTS,
             NUMBER_FINAL_RECOMMENDATIONS,
+            callback=lambda message, update_existing, streaming=True, first_chunk=False: self.update_chat(
+                message, update_existing, streaming, first_chunk
+            ),
         )
 
         self.remove_loading_spinner()
