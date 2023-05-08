@@ -1,0 +1,724 @@
+[
+  {
+    "publicInfo": {
+      "website": "https://chocolatewise.com/",
+      "email": "orders@chocolatewise.com",
+      "phone": "7182187271",
+      "note": ""
+    },
+    "adapters": {
+      "dropShip": [
+        "63d0842be39eae96321030fc",
+        "6425f694f0676fdef7b372d7"
+      ]
+    },
+    "_id": "63d051097f3c9446c5da32b1",
+    "location": "US",
+    "externalId": "",
+    "name": "Chocolate Wise",
+    "billTo": {
+      "_id": "63cf27007f3c9446c5d64592",
+      "name": "",
+      "phone": "(718) 218-7271",
+      "email": "",
+      "address1": "106 Lee Ave",
+      "address2": "",
+      "unitSuit": "",
+      "city": "Brooklyn",
+      "stateProvince": "NY",
+      "postalCode": "11211",
+      "country": "US",
+      "vatId": "",
+      "note": ""
+    },
+    "contacts": [
+      {
+        "name": "Chesky Wiess",
+        "email": "info@chocolatewise.com",
+        "phone": "(718) 218-7271",
+        "primary": true,
+        "_id": "63d05116c948bedbc44be174"
+      }
+    ],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "63d0848a7f3c9446c5daffac"
+      },
+      "policies": [],
+      "_id": "63d051097f3c9446c5da32b2"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-01-24T21:43:37.959Z",
+    "timestamp": "2023-01-24T21:43:37.971Z",
+    "updatedAt": "2023-03-30T20:52:36.997Z",
+    "id": 10000
+  },
+  {
+    "adapters": {
+      "dropShip": [
+        "63d1577f7d6a66611b9672ee"
+      ]
+    },
+    "_id": "63d156d90367bb2ad5dd763f",
+    "location": "US",
+    "externalId": "",
+    "name": "Scentfinity",
+    "contacts": [
+      {
+        "name": "Hannah Krupnik",
+        "email": "info@scentfinity.com",
+        "phone": "732- 795 -6300",
+        "note": "ext 103",
+        "primary": true,
+        "_id": "63d15711b57316d5d3cc56a7"
+      }
+    ],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "63d157256056c1b8f49db660"
+      },
+      "policies": [],
+      "_id": "63d156d90367bb2ad5dd7640"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-01-25T16:20:41.152Z",
+    "timestamp": "2023-01-25T16:20:41.162Z",
+    "updatedAt": "2023-02-14T17:10:17.899Z",
+    "id": 10001
+  },
+  {
+    "publicInfo": {
+      "website": "",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    "adapters": {
+      "dropShip": [
+        "63d1ad627c443160dcfde7d3"
+      ]
+    },
+    "_id": "63d1abc27d6a66611b986f6e",
+    "location": "US",
+    "externalId": "",
+    "name": "Glizze Gifts",
+    "contacts": [
+      {
+        "name": "Yoel Shpitz",
+        "email": "info@glizzegifts.com",
+        "phone": "(718) 809-7487",
+        "primary": true,
+        "_id": "63d1b1dc0367bb2ad5df928c"
+      }
+    ],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "63d1ac0a6056c1b8f49fc6e9"
+      },
+      "policies": [],
+      "_id": "63d1abc27d6a66611b986f6f"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-01-25T22:22:58.229Z",
+    "timestamp": "2023-01-25T22:22:58.238Z",
+    "updatedAt": "2023-03-29T21:00:41.526Z",
+    "id": 10002
+  },
+  {
+    "adapters": {
+      "dropShip": [
+        "63f3a520bb7ba9847e85e658"
+      ]
+    },
+    "_id": "63f39fae404220100e0d630e",
+    "location": "US",
+    "externalId": "",
+    "name": "The Brown Box",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "63f3a065fcfe9bed82d46d33"
+      },
+      "policies": [],
+      "_id": "63f39fae404220100e0d630f"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-02-20T16:28:30.625Z",
+    "timestamp": "2023-02-20T16:28:30.632Z",
+    "updatedAt": "2023-02-20T16:51:44.860Z",
+    "id": 10008
+  },
+  {
+    "adapters": {
+      "dropShip": [
+        "63f3b18ace582ed38f9961d3"
+      ]
+    },
+    "_id": "63f3afdcce582ed38f9954cb",
+    "location": "US",
+    "externalId": "",
+    "name": "LUCY'S FLOWERS",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "63f3b036bb7ba9847e863f51"
+      },
+      "policies": [],
+      "_id": "63f3afdcce582ed38f9954cc"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-02-20T17:37:32.010Z",
+    "timestamp": "2023-02-20T17:37:32.025Z",
+    "updatedAt": "2023-02-20T17:44:42.941Z",
+    "id": 10009
+  },
+  {
+    "adapters": {
+      "dropShip": []
+    },
+    "_id": "63f7b7e1e21ca930a40da03b",
+    "location": "US",
+    "externalId": "",
+    "name": "Brooklyn BoardZ",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd"
+      },
+      "policies": [],
+      "_id": "63f7b7e1e21ca930a40da03c"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-02-23T19:00:49.578Z",
+    "timestamp": "2023-02-23T19:00:49.584Z",
+    "updatedAt": "2023-02-23T19:00:49.584Z",
+    "id": 10010
+  },
+  {
+    "adapters": {
+      "dropShip": []
+    },
+    "_id": "6400c14a25df141629456f78",
+    "location": "US",
+    "externalId": "http://www.tudorgreenflorists.co.uk/",
+    "name": "Tudor Green Florists",
+    "contacts": [
+      {
+        "name": "Tudor Green Florists - Golders Green branch",
+        "email": "tudorgreenflorists@gmail.com",
+        "phone": "442084556012",
+        "primary": true,
+        "_id": "6400c1bf25df1416294571eb"
+      },
+      {
+        "name": "Tudor Green Florists - Stamford hill branch",
+        "email": "tudorgreenflorists@gmail.com",
+        "phone": "442088067928",
+        "_id": "6400c1bf25df1416294571ec"
+      }
+    ],
+    "configs": {
+      "general": {
+        "timeZone": "Europe/London",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "6400d6cd5443e2dfbeed4515"
+      },
+      "policies": [],
+      "_id": "6400c14a25df141629456f79"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-03-02T15:31:22.132Z",
+    "timestamp": "2023-03-02T15:31:22.141Z",
+    "updatedAt": "2023-03-03T14:05:16.231Z",
+    "id": 10011
+  },
+  {
+    "publicInfo": {
+      "website": "",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    "adapters": {
+      "dropShip": [
+        "6410c024228261f2024fdce4"
+      ]
+    },
+    "_id": "6410bd8e64483d11b5d70595",
+    "location": "US",
+    "externalId": "",
+    "name": "FE Ironic Flavors",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "6410bdcf64483d11b5d705db"
+      },
+      "policies": [],
+      "_id": "6410bd8e64483d11b5d70596"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-03-14T18:31:42.266Z",
+    "timestamp": "2023-03-14T18:31:42.275Z",
+    "updatedAt": "2023-03-15T17:47:06.840Z",
+    "id": 10012
+  },
+  {
+    "publicInfo": {
+      "website": "mywebsite.com",
+      "email": "getzy@giftem.shop",
+      "phone": "8455379875",
+      "note": "This is the note"
+    },
+    "adapters": {
+      "dropShip": []
+    },
+    "_id": "6410c1d4228261f2024fe8b6",
+    "location": "US",
+    "externalId": "",
+    "name": "Getzy Diffuzers - affiliate",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "6410c23ed0e1721bc4650cd1"
+      },
+      "policies": [],
+      "_id": "6410c1d4228261f2024fe8b7"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-03-14T18:49:56.813Z",
+    "timestamp": "2023-03-14T18:49:56.821Z",
+    "updatedAt": "2023-03-14T18:56:00.691Z",
+    "id": 10013
+  },
+  {
+    "publicInfo": {
+      "website": "https://themeltny.com/",
+      "email": "info@themeltny.com",
+      "phone": "18456644449",
+      "note": "The melt is located in monsey ny and in williamsburg brooklyn ny"
+    },
+    "adapters": {
+      "dropShip": [
+        "641490e48a73a04e22691a68"
+      ]
+    },
+    "_id": "64148f6421dc4f787d37cb9e",
+    "location": "US",
+    "externalId": "",
+    "name": "Melt",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "64148fae7c6a2172c737cf8c"
+      },
+      "policies": [],
+      "_id": "64148f6421dc4f787d37cb9f"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-03-17T16:03:48.925Z",
+    "timestamp": "2023-03-17T16:03:48.935Z",
+    "updatedAt": "2023-03-22T21:06:05.484Z",
+    "id": 10014
+  },
+  {
+    "publicInfo": {
+      "website": "https://flavoronboard.com/",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    "adapters": {
+      "dropShip": []
+    },
+    "_id": "6418bc3e6ba42e232ba326ed",
+    "location": "US",
+    "externalId": "",
+    "name": "Flavor on Board",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd"
+      },
+      "policies": [],
+      "_id": "6418bc3e6ba42e232ba326ee"
+    },
+    "type": "drop-ship",
+    "isActive": false,
+    "createdAt": "2023-03-20T20:04:14.487Z",
+    "timestamp": "2023-03-20T20:04:14.494Z",
+    "updatedAt": "2023-03-20T20:06:07.682Z",
+    "id": 10015
+  },
+  {
+    "publicInfo": {
+      "website": "https://flavoronboard.com/",
+      "email": "Info@flavoronboard.com",
+      "phone": "845-688-8989",
+      "note": "Flavor on board delivers nationwide in the united states. https://www.instagram.com/flavoronboard/"
+    },
+    "adapters": {
+      "dropShip": [
+        "6418be43634c05a7ff1709b2"
+      ]
+    },
+    "_id": "6418bc9a634c05a7ff17023b",
+    "location": "US",
+    "externalId": "",
+    "name": "Flavor On Board",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "6418bcd4634c05a7ff17028b"
+      },
+      "policies": [],
+      "_id": "6418bc9a634c05a7ff17023c"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-03-20T20:05:46.116Z",
+    "timestamp": "2023-03-20T20:05:46.123Z",
+    "updatedAt": "2023-03-22T21:05:52.030Z",
+    "id": 10016
+  },
+  {
+    "publicInfo": {
+      "website": "https://www.judaicaplace.com/",
+      "email": "orders@judaicaplace.com",
+      "phone": "(718) 677-0221",
+      "note": "Follow on Instagram https://www.instagram.com/judaicaplace/"
+    },
+    "adapters": {
+      "dropShip": [
+        "641b590bbe96f9b4a52dfe82"
+      ]
+    },
+    "_id": "641b27fe0356325f87c56ff9",
+    "location": "US",
+    "externalId": "",
+    "name": "The Judaica Place",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "641b29496fc3b7f6a82fb354"
+      },
+      "policies": [],
+      "_id": "641b27fe0356325f87c56ffa"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-03-22T16:08:30.750Z",
+    "timestamp": "2023-03-22T16:08:30.760Z",
+    "updatedAt": "2023-03-22T21:05:27.366Z",
+    "id": 10017
+  },
+  {
+    "publicInfo": {
+      "website": "https://moderntribe.com/?aff=144",
+      "email": "shalom@moderntribe.com",
+      "phone": "877-324-1818",
+      "note": ""
+    },
+    "adapters": {
+      "dropShip": [
+        "641b6ca5650465e272a8686f"
+      ]
+    },
+    "_id": "641b6824c59b8755a66d5508",
+    "location": "US",
+    "externalId": "",
+    "name": "Moderntribe",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "641b683dc59b8755a66d561a"
+      },
+      "policies": [],
+      "_id": "641b6824c59b8755a66d5509"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-03-22T20:42:12.985Z",
+    "timestamp": "2023-03-22T20:42:12.995Z",
+    "updatedAt": "2023-03-22T21:05:13.744Z",
+    "id": 10018
+  },
+  {
+    "publicInfo": {
+      "website": "https://www.nutcravings.com/",
+      "email": "care@nutcravings.com",
+      "phone": "1-845-999-1688",
+      "note": ""
+    },
+    "adapters": {
+      "dropShip": [
+        "6421f32d839acef1cafc2958"
+      ]
+    },
+    "_id": "6421f298082d3da8ea5496e1",
+    "location": "US",
+    "externalId": "",
+    "name": "Nut cravings",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "6421f2ad082d3da8ea5497a1"
+      },
+      "policies": [],
+      "_id": "6421f298082d3da8ea5496e2"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-03-27T19:46:32.184Z",
+    "timestamp": "2023-03-27T19:46:32.191Z",
+    "updatedAt": "2023-03-27T19:49:01.347Z",
+    "id": 10019
+  },
+  {
+    "publicInfo": {
+      "website": "https://www.aperfectpresentla.com/",
+      "email": "info@aperfectpresentla.com",
+      "phone": "(323) 405-7474",
+      "note": "https://www.instagram.com/aperfectpresent_la/?hl=en"
+    },
+    "adapters": {
+      "dropShip": [
+        "64220450530885d21f3bd60a",
+        "64220522839acef1cafca429"
+      ]
+    },
+    "_id": "6422027c505157602db50e33",
+    "location": "US",
+    "externalId": "",
+    "name": "A Perfect Present LA",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd"
+      },
+      "policies": [],
+      "_id": "6422027c505157602db50e34"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-03-27T20:54:20.822Z",
+    "timestamp": "2023-03-27T20:54:20.829Z",
+    "updatedAt": "2023-03-27T21:05:38.937Z",
+    "id": 10020
+  },
+  {
+    "publicInfo": {
+      "website": "https://www.lechocolatier.com/",
+      "email": "info@lechocolatier.com",
+      "phone": "3059443020",
+      "note": ""
+    },
+    "adapters": {
+      "dropShip": [
+        "642351c1987fb239fcffd7e3"
+      ]
+    },
+    "_id": "64234f67973e2a05f38b34b9",
+    "location": "US",
+    "externalId": "",
+    "name": "Le Chocolatier",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd"
+      },
+      "policies": [],
+      "_id": "64234f67973e2a05f38b34ba"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-03-28T20:34:47.766Z",
+    "timestamp": "2023-03-28T20:34:47.776Z",
+    "updatedAt": "2023-03-28T20:44:49.589Z",
+    "id": 10021
+  },
+  {
+    "publicInfo": {
+      "website": "",
+      "email": "",
+      "phone": "",
+      "note": "Custom Gift Wrapping available. Call us after ordering"
+    },
+    "adapters": {
+      "dropShip": [
+        "6441a2c506cc01936404f406"
+      ]
+    },
+    "_id": "642481138771a7bc8e691a63",
+    "location": "US",
+    "externalId": "",
+    "name": "DG - Decorative Gifts",
+    "billTo": {
+      "_id": "642390cb8771a7bc8e6709b9",
+      "name": "DG - Decorative Gifts",
+      "phone": "",
+      "email": "livinggoodsinc@gmail.com",
+      "address1": "4 Lublin Way, Monroe, NY 10950",
+      "address2": "",
+      "unitSuit": "",
+      "city": "Monroe",
+      "stateProvince": "NY",
+      "postalCode": "10950",
+      "country": "US",
+      "vatId": "",
+      "note": ""
+    },
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "6424852f720711c87b0e9fe5"
+      },
+      "policies": [],
+      "_id": "642481138771a7bc8e691a64"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-03-29T18:18:59.164Z",
+    "timestamp": "2023-03-29T18:18:59.173Z",
+    "updatedAt": "2023-04-25T20:28:40.118Z",
+    "id": 10022
+  },
+  {
+    "publicInfo": {
+      "website": "https://vienneseny.com/",
+      "email": "info@vienneseny.com",
+      "phone": "7182432462",
+      "note": ""
+    },
+    "adapters": {
+      "dropShip": [
+        "64402f3636dfe9724e97f846"
+      ]
+    },
+    "_id": "64402c4d38b490c85ee83a6f",
+    "location": "US",
+    "externalId": "",
+    "name": "Viennese Classic Confections",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "64402d2a592037a4e7497148"
+      },
+      "policies": [],
+      "_id": "64402c4d38b490c85ee83a70"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-04-19T18:00:45.345Z",
+    "timestamp": "2023-04-19T18:00:45.354Z",
+    "updatedAt": "2023-04-20T19:59:43.796Z",
+    "id": 10023
+  },
+  {
+    "publicInfo": {
+      "website": "",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    "adapters": {
+      "dropShip": [
+        "6440597d592037a4e749e481"
+      ]
+    },
+    "_id": "644056de08bc0a1850ab320d",
+    "location": "US",
+    "externalId": "",
+    "name": "PCPops",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd",
+        "defaultInventoryWarehouse": "6440592636dfe9724e985ef9"
+      },
+      "policies": [],
+      "_id": "644056de08bc0a1850ab320e"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-04-19T21:02:22.416Z",
+    "timestamp": "2023-04-19T21:02:22.424Z",
+    "updatedAt": "2023-04-24T15:49:05.030Z",
+    "id": 10024
+  },
+  {
+    "publicInfo": {
+      "website": "",
+      "email": "",
+      "phone": "",
+      "note": ""
+    },
+    "adapters": {
+      "dropShip": [
+        "6441a93760b2eaf31c53f5e1",
+        "64480768d67c553b17b8dbba"
+      ]
+    },
+    "_id": "6441a8f2d9a462c8134ef789",
+    "location": "US",
+    "externalId": "",
+    "name": "GiftemTesting",
+    "contacts": [],
+    "configs": {
+      "general": {
+        "timeZone": "EST",
+        "defaultCurrency": "usd"
+      },
+      "policies": [],
+      "_id": "6441a8f2d9a462c8134ef78a"
+    },
+    "type": "drop-ship",
+    "isActive": true,
+    "createdAt": "2023-04-20T21:04:50.337Z",
+    "timestamp": "2023-04-20T21:04:50.347Z",
+    "updatedAt": "2023-04-25T17:01:28.901Z",
+    "id": 10025
+  }
+]

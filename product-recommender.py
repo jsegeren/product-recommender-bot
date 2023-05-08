@@ -48,6 +48,10 @@ UI_SCALING = 1.3
 UI_WINDOW_WIDTH = 1100
 UI_WINDOW_HEIGHT = 580
 
+USE_CUSTOM_PARSER = True  # Set to True to use the custom parser
+CUSTOM_DATA_FILENAME = "./giftem/giftem-products.json"  # Change this to your custom data file when using the custom parser
+
+
 def compute_file_hash(filename):
     hash_blake3 = blake3.blake3()
     with open(filename, "rb") as f:
@@ -55,11 +59,18 @@ def compute_file_hash(filename):
             hash_blake3.update(chunk)
     return hash_blake3.hexdigest()
 
+
 def clear_index_data(pinecone_index):
     # Delete all vectors from the index
     pinecone_index.delete(deleteAll=True)
 
-def generate_single_embedding(text, model="text-embedding-ada-002", retries=REQUEST_RETRIES, backoff=REQUEST_RETRY_BACKOFF):
+
+def generate_single_embedding(
+    text,
+    model="text-embedding-ada-002",
+    retries=REQUEST_RETRIES,
+    backoff=REQUEST_RETRY_BACKOFF,
+):
     openai.api_key = OPENAI_API_KEY
 
     escaped_text = json.dumps(text)  # Escape special characters
@@ -67,7 +78,7 @@ def generate_single_embedding(text, model="text-embedding-ada-002", retries=REQU
     while attempt <= retries:
         try:
             response = openai.Embedding.create(input=escaped_text, engine=model)
-            embedding = response["data"][0]["embedding"] # type: ignore
+            embedding = response["data"][0]["embedding"]  # type: ignore
             return embedding
         except Exception as e:
             print(f"Error generating embedding for text: {text}")
@@ -75,10 +86,12 @@ def generate_single_embedding(text, model="text-embedding-ada-002", retries=REQU
             if attempt == retries:
                 return None
             attempt += 1
-            time.sleep(backoff ** attempt)
+            time.sleep(backoff**attempt)
 
 
-def generate_embeddings(texts, model="text-embedding-ada-002", parallel_calls=REQUEST_PARALLEL_CALLS):
+def generate_embeddings(
+    texts, model="text-embedding-ada-002", parallel_calls=REQUEST_PARALLEL_CALLS
+):
     embeddings = []
 
     with ThreadPoolExecutor(max_workers=parallel_calls) as executor:
@@ -124,7 +137,7 @@ def preprocess_and_build_index(dataframe, rebuild=False, batch_size=REQUEST_BATC
         pinecone.create_index(
             name=index_name, dimension=embedding_dimension, metric="cosine", shards=1
         )
-        print ("Created new index (Pinecone)!")
+        print("Created new index (Pinecone)!")
         is_index_empty = True
 
     if is_index_empty:
@@ -136,8 +149,10 @@ def preprocess_and_build_index(dataframe, rebuild=False, batch_size=REQUEST_BATC
             embeddings = generate_embeddings(batch_data["combined_info"].tolist())
             ids = [str(id) for id in batch_data["id"].tolist()]
 
-            pinecone_index.upsert(vectors=zip(ids, embeddings)) # type: ignore
-            print(f"Finished upserting embeddings for batch {i // batch_size + 1} of {number_total_batches}...")
+            pinecone_index.upsert(vectors=zip(ids, embeddings))  # type: ignore
+            print(
+                f"Finished upserting embeddings for batch {i // batch_size + 1} of {number_total_batches}..."
+            )
 
     pinecone_index = pinecone.Index(index_name=index_name)
     # print("Clearing index data...")
@@ -167,13 +182,17 @@ def retrieve_top_products(user_description, pinecone_index, dataframe, top_n):
             continue
 
         product = dataframe.loc[product_id]
-        print(f"Matched product {product_id} - {product['product_name']}")
+        print(f"Matched product {product_id} - {product['name']}")
         product_info.append(
-            (product_id, product["product_name"], product["product_price"], product["product_description"])
+            (
+                product_id,
+                product["name"],
+                product["price"],
+                product["description"],
+            )
         )
 
     return product_info
-
 
 
 def get_search_string(user_description):
@@ -189,28 +208,39 @@ def get_search_string(user_description):
         temperature=0.3,
     )
 
-    search_string = response.choices[0].message["content"].strip() # type: ignore
+    search_string = response.choices[0].message["content"].strip()  # type: ignore
     print("Search string: " + search_string)
 
     return search_string
 
 
-def recommend_gifts(search_query, pinecone_index, dataframe, number_filtered_products, number_final_recommendations):
+def recommend_gifts(
+    search_query,
+    pinecone_index,
+    dataframe,
+    number_filtered_products,
+    number_final_recommendations,
+):
     top_products = retrieve_top_products(
         search_query, pinecone_index, dataframe, number_filtered_products
     )
 
-    prompt = f"You are an expert personal shopping assistant. Given the product search query, \"{search_query}\", please choose the best {number_final_recommendations} gifts from the following relevant {number_filtered_products} options in our product catalogue:\n\n"
+    prompt = f'You are an expert personal shopping assistant. Given the product search query, "{search_query}", please choose the best {number_final_recommendations} gifts from the following relevant {number_filtered_products} options in our product catalogue:\n\n'
 
-    for index, (product_id, product_name, product_price, product_description) in enumerate(
-        top_products
-    ):
-        prompt += f"{product_id}. {product_name} ({product_price}) - {product_description}\n"
+    for index, (
+        product_id,
+        product_name,
+        product_price,
+        product_description,
+    ) in enumerate(top_products):
+        prompt += (
+            f"{product_id}. {product_name} ({product_price}) - {product_description}\n"
+        )
 
     prompt += "\nPlease give your recommendations in this format: {rank}. *{product name}* ({product price}) - {reason / explanation why this is a good gift suggestion}."
 
     # print("Prompt: ", prompt)
-    
+
     openai.api_key = OPENAI_API_KEY
     response = openai.ChatCompletion.create(
         model="gpt-4",
@@ -223,11 +253,10 @@ def recommend_gifts(search_query, pinecone_index, dataframe, number_filtered_pro
 
     # print(response)
 
-    return response.choices[0].message["content"].strip() # type: ignore
+    return response.choices[0].message["content"].strip()  # type: ignore
 
 
 def generate_single_product(retries=REQUEST_RETRIES, backoff=REQUEST_RETRY_BACKOFF):
-
     product_categories = [
         "Electronics",
         "Home & Kitchen",
@@ -271,7 +300,7 @@ def generate_single_product(retries=REQUEST_RETRIES, backoff=REQUEST_RETRY_BACKO
         f"Please provide the NAME, PRICE, and SHORT DESCRIPTION for a unique and completely random product in the '{category}' category sold by your store. "
         "The description must be a single, clear, concise sentence (less than 10 words) that is helpful to a potential customer. "
         "Avoid using excessive keywords and focus on providing a meaningful, human-readable, English-language description. "
-        "Please use the format \"Name:{product name}\nPrice:{product price}\nDescription:{product description}\n\""
+        'Please use the format "Name:{product name}\nPrice:{product price}\nDescription:{product description}\n"'
     )
 
     attempt = 0
@@ -287,7 +316,7 @@ def generate_single_product(retries=REQUEST_RETRIES, backoff=REQUEST_RETRY_BACKO
                 timeout=10,  # Add a timeout to the API request
             )
 
-            item = response.choices[0].message.content.strip() # type: ignore
+            item = response.choices[0].message.content.strip()  # type: ignore
 
             pattern = r"Name:(.+)\nPrice:(.+)\nDescription:(.+)"
             match = re.search(pattern, item)
@@ -314,14 +343,21 @@ def generate_single_product(retries=REQUEST_RETRIES, backoff=REQUEST_RETRY_BACKO
             if attempt == retries:
                 return None
             attempt += 1
-            time.sleep(backoff ** attempt)
+            time.sleep(backoff**attempt)
 
 
 # Generate sample data
 def generate_sample_data(filename, num_samples, batch_size=REQUEST_BATCH_SIZE):
     with open(filename, "w", newline="", encoding="utf-8") as csvfile:
         fieldnames = ["product_name", "product_price", "product_description"]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, escapechar='\\')
+        writer = csv.DictWriter(
+            csvfile,
+            fieldnames=fieldnames,
+            delimiter=",",
+            quotechar='"',
+            quoting=csv.QUOTE_MINIMAL,
+            escapechar="\\",
+        )
         writer.writeheader()
 
         sampleNumber = 1
@@ -330,10 +366,15 @@ def generate_sample_data(filename, num_samples, batch_size=REQUEST_BATCH_SIZE):
         num_batches = (num_samples + batch_size - 1) // batch_size
 
         for batch in range(num_batches):
-            samples_in_batch = batch_size if batch < num_batches - 1 else num_samples - batch * batch_size
+            samples_in_batch = (
+                batch_size
+                if batch < num_batches - 1
+                else num_samples - batch * batch_size
+            )
             with ThreadPoolExecutor(max_workers=samples_in_batch) as executor:
                 product_futures = [
-                    executor.submit(generate_single_product) for _ in range(samples_in_batch)
+                    executor.submit(generate_single_product)
+                    for _ in range(samples_in_batch)
                 ]
                 for future in as_completed(product_futures):
                     product = future.result()
@@ -344,21 +385,109 @@ def generate_sample_data(filename, num_samples, batch_size=REQUEST_BATCH_SIZE):
                         sampleNumber += 1
 
 
+def standardize_column_names(data):
+    column_mapping = {
+        "product_name": "name",
+        "product_price": "price",
+        "product_description": "description",
+    }
+    data = data.rename(columns=column_mapping)
+    return data
+
+
+# Load and parse data
+# Support configurability to load using custom parser (for custom product datasets)
+def load_and_parse_data(filename, use_custom_parser=False):
+    if use_custom_parser:
+        data = parse_giftem_data(filename)
+    else:
+        data = load_data(filename)
+
+    data = standardize_column_names(data)  # Standardize column names
+
+    data["id"] = data.index  # Add/generate an 'id' column
+    data["combined_info"] = data.apply(
+        lambda x: f"{x['name']} {x['price']} {x['description']}",
+        axis=1,
+    )
+    return data
+
+
 # Load data
 def load_data(filename):
     data = pd.read_csv(filename)
     data["id"] = data.index  # Add/generate an  'id' column
     data["combined_info"] = data.apply(
-        lambda x: f"{x['product_name']} {x['product_price']} {x['product_description']}", axis=1
+        lambda x: f"{x['product_name']} {x['product_price']} {x['product_description']}",
+        axis=1,
     )
     return data
+
+
+def parse_giftem_data(filename):
+    with open(filename, "r", encoding="utf-8") as f:
+        giftem_data = json.load(f)
+
+    data_list = []
+    for product in giftem_data:
+        product_id = product.get("id")
+        product_SKU = product.get("SKU")
+        product_name = product.get("name", "")
+        product_description = product.get("description", "")
+        unit_cost = product.get("unitCost")
+        weight = product["inventory"].get("shippingValue")
+        weight_unit = product["inventory"].get("weightUnit")
+        requires_shipping = product["inventory"].get("requiresShipping", False)
+        categories = [
+            category["name"]
+            for category in product["organization"].get("categories", [])
+        ]
+        tags = product["organization"].get("tags", [])
+        brands = product["organization"].get("brands", [])
+        vendors = [
+            vendor["name"] for vendor in product["organization"].get("vendors", [])
+        ]
+        images = [image["url"] for image in product.get("images", [])]
+
+        # Set product_price to unitPrice if channelSpecific is not empty, otherwise set it to None
+        product_price = (
+            product["channelSpecific"][0]["configs"]["unitPrice"]
+            if product.get("channelSpecific")
+            else None
+        )
+
+        combined_info = f"{product_name} {product_price} {product_description}"
+
+        data_list.append(
+            {
+                "id": product_id,
+                "SKU": product_SKU,
+                "name": product_name,
+                "price": product_price,
+                "description": product_description,
+                "unitCost": unit_cost,
+                "weight": weight,
+                "weightUnit": weight_unit,
+                "requiresShipping": requires_shipping,
+                "categories": categories,
+                "tags": tags,
+                "brands": brands,
+                "vendors": vendors,
+                "images": images,
+                "combined_info": combined_info,
+            }
+        )
+
+    dataframe = pd.DataFrame(data_list)
+    return dataframe
+
 
 class ChatBotUI(ctk.CTk):
     def __init__(self, pinecone_index, data):
         super().__init__()
         self.pinecone_index = pinecone_index
         self.data = data
-        self.chat_labels = []  
+        self.chat_labels = []
         self.create_chat_area()
         self.title(UI_APP_TITLE)
         self.geometry(f"{UI_WINDOW_WIDTH}x{UI_WINDOW_HEIGHT}")
@@ -400,9 +529,11 @@ class ChatBotUI(ctk.CTk):
 
         # Calculate the number of lines based on the width and height of the text
         font = ctk.CTkFont(size=12)
-        linespace = font.metrics()['linespace']
+        linespace = font.metrics()["linespace"]
         text_width = font.measure(text)
-        num_lines = math.ceil(text_width / (round(UI_WINDOW_WIDTH * 0.8)) * linespace * 2.3)
+        num_lines = math.ceil(
+            text_width / (round(UI_WINDOW_WIDTH * 0.8)) * linespace * 2.3
+        )
 
         chat_text = ctk.CTkTextbox(
             self.chat_area,
@@ -415,7 +546,7 @@ class ChatBotUI(ctk.CTk):
         )
 
         chat_text.insert(tk.END, text)
-        chat_text.configure(state='disabled')  # Disable editing
+        chat_text.configure(state="disabled")  # Disable editing
 
         chat_text.pack(anchor=tk.W, padx=(10 if role == "bot" else 50), pady=5)
 
@@ -428,7 +559,7 @@ class ChatBotUI(ctk.CTk):
             text="Great! Working on it...",
             font=ctk.CTkFont(size=12),
             padx=10,
-            pady=10
+            pady=10,
         )
         self.loading_spinner.pack(anchor=tk.W, padx=50, pady=5)
 
@@ -443,38 +574,48 @@ class ChatBotUI(ctk.CTk):
             self.append_chat("user", user_input)
 
             # Disable text input and submit button
-            self.text_input.configure(state='disabled')
-            self.submit_button.configure(state='disabled')
+            self.text_input.configure(state="disabled")
+            self.submit_button.configure(state="disabled")
 
-            recommendation_thread = threading.Thread(target=self.get_recommendations_and_append, args=(user_input,))
+            recommendation_thread = threading.Thread(
+                target=self.get_recommendations_and_append, args=(user_input,)
+            )
             recommendation_thread.start()
 
     def get_recommendations_and_append(self, user_input):
         self.append_loading_spinner()
 
         recommendations = recommend_gifts(
-            user_input, self.pinecone_index, self.data, NUMBER_FILTERED_PRODUCTS, NUMBER_FINAL_RECOMMENDATIONS
+            user_input,
+            self.pinecone_index,
+            self.data,
+            NUMBER_FILTERED_PRODUCTS,
+            NUMBER_FINAL_RECOMMENDATIONS,
         )
 
         self.remove_loading_spinner()
         self.append_chat("bot", recommendations)
 
         # Re-enable text input and submit button
-        self.text_input.configure(state='normal')
-        self.submit_button.configure(state='normal')
-        
+        self.text_input.configure(state="normal")
+        self.submit_button.configure(state="normal")
+
 
 def main():
-    if not os.path.exists(DATA_FILENAME) or os.path.getsize(DATA_FILENAME) == 0:
+    if USE_CUSTOM_PARSER:
+        data_filename = CUSTOM_DATA_FILENAME
+    elif not os.path.exists(DATA_FILENAME) or os.path.getsize(DATA_FILENAME) == 0:
         print("Generating sample data...")
         generate_sample_data(DATA_FILENAME, NUMBER_TOTAL_PRODUCTS)
+        data_filename = DATA_FILENAME
     else:
         print("Sample data file already exists, skipping data generation.")
+        data_filename = DATA_FILENAME
 
-    data = load_data(DATA_FILENAME)
+    data = load_and_parse_data(data_filename, USE_CUSTOM_PARSER)
 
     # Compute the hash of the current CSV file
-    current_hash = compute_file_hash(DATA_FILENAME)
+    current_hash = compute_file_hash(data_filename)
 
     # Check if the stored hash file exists and read the hash
     if os.path.exists(HASH_FILENAME):
@@ -501,10 +642,12 @@ def main():
     # Display UI
     # display_ui(lambda user_description: recommend_gifts(user_description, pinecone_index, data, NUMBER_FILTERED_PRODUCTS, NUMBER_FINAL_RECOMMENDATIONS))
 
-     # Display UI
-     # Initialize Tkinter
+    # Display UI
+    # Initialize Tkinter
     ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
-    ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
+    ctk.set_default_color_theme(
+        "blue"
+    )  # Themes: "blue" (standard), "green", "dark-blue"
 
     chatbot_ui = ChatBotUI(pinecone_index, data)
 
